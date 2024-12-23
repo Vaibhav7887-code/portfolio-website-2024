@@ -166,7 +166,7 @@ export default function ValaHeritageCase() {
       <ProjectSwitcher currentProject="Vala Heritage" />
       
       {/* Loading Screen */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {isLoading && (
           <motion.div 
             className="fixed inset-0 z-[100] bg-white flex items-center justify-center"
@@ -245,8 +245,8 @@ export default function ValaHeritageCase() {
         ref={containerRef}
         className="relative bg-white"
         initial={{ opacity: 0 }}
-        animate={{ opacity: isLoading ? 0 : 1 }}
-        transition={{ duration: 0.5 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
       >
         {/* Progress Bar */}
         <motion.div 

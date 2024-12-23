@@ -1,6 +1,5 @@
 import './globals.css'
 import { Alice, Sacramento, Open_Sans } from 'next/font/google'
-import CustomCursor from '@/components/CustomCursor'
 
 const alice = Alice({ 
   weight: '400',
@@ -32,7 +31,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${alice.variable} ${sacramento.variable} ${openSans.variable}`}>
-        <CustomCursor />
         {children}
       </body>
     </html>
