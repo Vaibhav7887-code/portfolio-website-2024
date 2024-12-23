@@ -1,4 +1,6 @@
-export const metadata = {
-  title: 'Your Portfolio',
-  description: 'Portfolio website built with Next.js',
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Vaibhav Sharma - UX Design Engineer',
+  description: 'Portfolio of Vaibhav Sharma, UX Design Engineer',
 } 

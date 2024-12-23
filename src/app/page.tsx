@@ -152,9 +152,10 @@ export default function Home() {
 
   // Add loading effect
   useEffect(() => {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setIsLoading(false)
     }, 2000)
+    return () => clearTimeout(timer)
   }, [])
 
   // Memoize hero content
@@ -315,33 +316,18 @@ export default function Home() {
 
   return (
     <>
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {isLoading && (
           <motion.div 
             className="fixed inset-0 z-[100] bg-white flex items-center justify-center"
-            exit={{ 
-              opacity: 0,
-              transition: { duration: 0.5, ease: "easeOut" }
-            }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ 
-                opacity: 1, 
-                scale: 1,
-                transition: {
-                  duration: 0.5,
-                  ease: "easeOut"
-                }
-              }}
-              exit={{ 
-                opacity: 0,
-                scale: 1.1,
-                transition: {
-                  duration: 0.5,
-                  ease: "easeIn"
-                }
-              }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.1 }}
+              transition={{ duration: 0.5 }}
               className="text-center"
             >
               <h1 className="font-alice text-3xl text-[#333333] mb-4">Welcome</h1>
@@ -388,7 +374,13 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      <div ref={containerRef} className="relative h-[800vh]">
+      <motion.div 
+        ref={containerRef}
+        className="relative h-[800vh]"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isLoading ? 0 : 1 }}
+        transition={{ duration: 0.5, delay: 0.5 }}
+      >
         <Navbar isLandingPage={true} />
 
         {isVisible && (
@@ -802,7 +794,7 @@ export default function Home() {
           }`} 
         /> {/* Case studies space */}
         <div className={`${isMobileLandscape ? 'h-[150vh]' : 'h-screen'}`} /> {/* Contact space */}
-      </div>
+      </motion.div>
     </>
   )
 }
