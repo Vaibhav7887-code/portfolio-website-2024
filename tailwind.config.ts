@@ -12,6 +12,11 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      fontFamily: {
+        alice: ['var(--font-alice)'],
+        sacramento: ['var(--font-sacramento)'],
+        opensans: ['var(--font-opensans)'],
+      },
     },
   },
   plugins: [],
