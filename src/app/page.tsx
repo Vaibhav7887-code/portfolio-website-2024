@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
+import { motion, useScroll, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import SkillsShowcase from '@/components/SkillsShowcase'

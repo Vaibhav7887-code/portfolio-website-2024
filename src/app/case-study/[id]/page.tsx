@@ -37,7 +37,7 @@ export default function CaseStudyPage({ params }: PageProps) {
       
       if (e.key === 'ArrowRight') {
         setCurrentSlide((prev) => 
-          prev < caseStudy.slides.length - 1 ? prev + 1 : prev
+          prev < (caseStudy?.slides.length ?? 0) - 1 ? prev + 1 : prev
         )
       } else if (e.key === 'ArrowLeft') {
         setCurrentSlide((prev) => prev > 0 ? prev - 1 : prev)
