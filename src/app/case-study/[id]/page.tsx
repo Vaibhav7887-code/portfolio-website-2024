@@ -27,8 +27,13 @@ export default function CaseStudyPage({ params }: PageProps) {
   const caseStudy = caseStudies[id as keyof typeof caseStudies]
 
   useEffect(() => {
+    if (!caseStudy) {
+      router.push('/404')
+      return
+    }
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isPresentationMode || !caseStudy) return
+      if (!isPresentationMode) return
       
       if (e.key === 'ArrowRight') {
         setCurrentSlide((prev) => 
@@ -41,10 +46,9 @@ export default function CaseStudyPage({ params }: PageProps) {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isPresentationMode, caseStudy])
+  }, [isPresentationMode, caseStudy, router])
 
   if (!caseStudy) {
-    router.push('/404')
     return null
   }
 

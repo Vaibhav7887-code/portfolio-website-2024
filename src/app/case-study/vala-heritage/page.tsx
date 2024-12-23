@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
+import { motion, useScroll, useTransform, AnimatePresence, MotionValue } from 'framer-motion'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import TableOfContents from '@/components/TableOfContents'
@@ -8,6 +8,23 @@ import OrientationWarning from '@/components/OrientationWarning'
 import MobileControls from '@/components/MobileControls'
 import ProjectSwitcher from '@/components/ProjectSwitcher'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
+
+function useSlideTransforms(scrollYProgress: MotionValue<number>, totalSlides: number): Array<{ y: MotionValue<string> }> {
+  return useMemo(() => {
+    const transforms = []
+    for (let i = 0; i < totalSlides; i++) {
+      const startY = i === 0 ? '0vh' : '100vh'
+      transforms.push({
+        y: useTransform(
+          scrollYProgress,
+          [i / totalSlides, (i + 1) / totalSlides],
+          [startY, '0vh']
+        )
+      })
+    }
+    return transforms
+  }, [scrollYProgress, totalSlides])
+}
 
 const scrollToSection = (section?: 'case-studies' | 'contact') => {
   sessionStorage.setItem('scrollTarget', section || 'case-studies')
@@ -60,65 +77,7 @@ export default function ValaHeritageCase() {
     offset: ["start", "end start"]
   })
 
-  // Create individual transforms for each slide
-  const slideTransform0 = useTransform(scrollYProgress, [0, 1/totalSlides], ['0vh', '0vh'])
-  const slideTransform1 = useTransform(scrollYProgress, [1/totalSlides, 2/totalSlides], ['100vh', '0vh'])
-  const slideTransform2 = useTransform(scrollYProgress, [2/totalSlides, 3/totalSlides], ['100vh', '0vh'])
-  const slideTransform3 = useTransform(scrollYProgress, [3/totalSlides, 4/totalSlides], ['100vh', '0vh'])
-  const slideTransform4 = useTransform(scrollYProgress, [4/totalSlides, 5/totalSlides], ['100vh', '0vh'])
-  const slideTransform5 = useTransform(scrollYProgress, [5/totalSlides, 6/totalSlides], ['100vh', '0vh'])
-  const slideTransform6 = useTransform(scrollYProgress, [6/totalSlides, 7/totalSlides], ['100vh', '0vh'])
-  const slideTransform7 = useTransform(scrollYProgress, [7/totalSlides, 8/totalSlides], ['100vh', '0vh'])
-  const slideTransform8 = useTransform(scrollYProgress, [8/totalSlides, 9/totalSlides], ['100vh', '0vh'])
-  const slideTransform9 = useTransform(scrollYProgress, [9/totalSlides, 10/totalSlides], ['100vh', '0vh'])
-  const slideTransform10 = useTransform(scrollYProgress, [10/totalSlides, 11/totalSlides], ['100vh', '0vh'])
-  const slideTransform11 = useTransform(scrollYProgress, [11/totalSlides, 12/totalSlides], ['100vh', '0vh'])
-  const slideTransform12 = useTransform(scrollYProgress, [12/totalSlides, 13/totalSlides], ['100vh', '0vh'])
-  const slideTransform13 = useTransform(scrollYProgress, [13/totalSlides, 14/totalSlides], ['100vh', '0vh'])
-  const slideTransform14 = useTransform(scrollYProgress, [14/totalSlides, 15/totalSlides], ['100vh', '0vh'])
-  const slideTransform15 = useTransform(scrollYProgress, [15/totalSlides, 16/totalSlides], ['100vh', '0vh'])
-  const slideTransform16 = useTransform(scrollYProgress, [16/totalSlides, 17/totalSlides], ['100vh', '0vh'])
-  const slideTransform17 = useTransform(scrollYProgress, [17/totalSlides, 18/totalSlides], ['100vh', '0vh'])
-  const slideTransform18 = useTransform(scrollYProgress, [18/totalSlides, 19/totalSlides], ['100vh', '0vh'])
-  const slideTransform19 = useTransform(scrollYProgress, [19/totalSlides, 20/totalSlides], ['100vh', '0vh'])
-  const slideTransform20 = useTransform(scrollYProgress, [20/totalSlides, 21/totalSlides], ['100vh', '0vh'])
-  const slideTransform21 = useTransform(scrollYProgress, [21/totalSlides, 22/totalSlides], ['100vh', '0vh'])
-  const slideTransform22 = useTransform(scrollYProgress, [22/totalSlides, 23/totalSlides], ['100vh', '0vh'])
-  const slideTransform23 = useTransform(scrollYProgress, [23/totalSlides, 24/totalSlides], ['100vh', '0vh'])
-  const slideTransform24 = useTransform(scrollYProgress, [24/totalSlides, 25/totalSlides], ['100vh', '0vh'])
-  const slideTransform25 = useTransform(scrollYProgress, [25/totalSlides, 26/totalSlides], ['100vh', '0vh'])
-  const slideTransform26 = useTransform(scrollYProgress, [26/totalSlides, 27/totalSlides], ['100vh', '0vh'])
-  const slideTransform27 = useTransform(scrollYProgress, [27/totalSlides, 28/totalSlides], ['100vh', '0vh'])
-  const slideTransform28 = useTransform(scrollYProgress, [28/totalSlides, 29/totalSlides], ['100vh', '0vh'])
-  const slideTransform29 = useTransform(scrollYProgress, [29/totalSlides, 30/totalSlides], ['100vh', '0vh'])
-  const slideTransform30 = useTransform(scrollYProgress, [30/totalSlides, 31/totalSlides], ['100vh', '0vh'])
-  const slideTransform31 = useTransform(scrollYProgress, [31/totalSlides, 32/totalSlides], ['100vh', '0vh'])
-  const slideTransform32 = useTransform(scrollYProgress, [32/totalSlides, 33/totalSlides], ['100vh', '0vh'])
-
-  // Map transforms to slides
-  const transforms = useMemo(() => [
-    { y: slideTransform0 }, { y: slideTransform1 }, { y: slideTransform2 },
-    { y: slideTransform3 }, { y: slideTransform4 }, { y: slideTransform5 },
-    { y: slideTransform6 }, { y: slideTransform7 }, { y: slideTransform8 },
-    { y: slideTransform9 }, { y: slideTransform10 }, { y: slideTransform11 },
-    { y: slideTransform12 }, { y: slideTransform13 }, { y: slideTransform14 },
-    { y: slideTransform15 }, { y: slideTransform16 }, { y: slideTransform17 },
-    { y: slideTransform18 }, { y: slideTransform19 }, { y: slideTransform20 },
-    { y: slideTransform21 }, { y: slideTransform22 }, { y: slideTransform23 },
-    { y: slideTransform24 }, { y: slideTransform25 }, { y: slideTransform26 },
-    { y: slideTransform27 }, { y: slideTransform28 }, { y: slideTransform29 },
-    { y: slideTransform30 }, { y: slideTransform31 }, { y: slideTransform32 }
-  ], [
-    slideTransform0, slideTransform1, slideTransform2, slideTransform3,
-    slideTransform4, slideTransform5, slideTransform6, slideTransform7,
-    slideTransform8, slideTransform9, slideTransform10, slideTransform11,
-    slideTransform12, slideTransform13, slideTransform14, slideTransform15,
-    slideTransform16, slideTransform17, slideTransform18, slideTransform19,
-    slideTransform20, slideTransform21, slideTransform22, slideTransform23,
-    slideTransform24, slideTransform25, slideTransform26, slideTransform27,
-    slideTransform28, slideTransform29, slideTransform30, slideTransform31,
-    slideTransform32
-  ])
+  const transforms = useSlideTransforms(scrollYProgress, totalSlides)
 
   // Add loading effect on mount
   useEffect(() => {

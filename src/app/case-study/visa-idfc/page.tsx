@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
+import { motion, useScroll, useTransform, AnimatePresence, MotionValue } from 'framer-motion'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import TableOfContents from '@/components/TableOfContents'
@@ -8,6 +8,23 @@ import OrientationWarning from '@/components/OrientationWarning'
 import MobileControls from '@/components/MobileControls'
 import ProjectSwitcher from '@/components/ProjectSwitcher'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
+
+function useSlideTransforms(scrollYProgress: MotionValue<number>, totalSlides: number): Array<{ y: MotionValue<string> }> {
+  return useMemo(() => {
+    const transforms = []
+    for (let i = 0; i < totalSlides; i++) {
+      const startY = i === 0 ? '0vh' : '100vh'
+      transforms.push({
+        y: useTransform(
+          scrollYProgress,
+          [i / totalSlides, (i + 1) / totalSlides],
+          [startY, '0vh']
+        )
+      })
+    }
+    return transforms
+  }, [scrollYProgress, totalSlides])
+}
 
 const scrollToSection = (section?: 'case-studies' | 'contact') => {
   sessionStorage.setItem('scrollTarget', section || 'case-studies')
@@ -58,47 +75,7 @@ export default function VisaIdfcCase() {
   })
 
   // Create individual transforms for each slide
-  const slideTransform0 = useTransform(scrollYProgress, [0, 1/totalSlides], ['0vh', '0vh'])
-  const slideTransform1 = useTransform(scrollYProgress, [1/totalSlides, 2/totalSlides], ['100vh', '0vh'])
-  const slideTransform2 = useTransform(scrollYProgress, [2/totalSlides, 3/totalSlides], ['100vh', '0vh'])
-  const slideTransform3 = useTransform(scrollYProgress, [3/totalSlides, 4/totalSlides], ['100vh', '0vh'])
-  const slideTransform4 = useTransform(scrollYProgress, [4/totalSlides, 5/totalSlides], ['100vh', '0vh'])
-  const slideTransform5 = useTransform(scrollYProgress, [5/totalSlides, 6/totalSlides], ['100vh', '0vh'])
-  const slideTransform6 = useTransform(scrollYProgress, [6/totalSlides, 7/totalSlides], ['100vh', '0vh'])
-  const slideTransform7 = useTransform(scrollYProgress, [7/totalSlides, 8/totalSlides], ['100vh', '0vh'])
-  const slideTransform8 = useTransform(scrollYProgress, [8/totalSlides, 9/totalSlides], ['100vh', '0vh'])
-  const slideTransform9 = useTransform(scrollYProgress, [9/totalSlides, 10/totalSlides], ['100vh', '0vh'])
-  const slideTransform10 = useTransform(scrollYProgress, [10/totalSlides, 11/totalSlides], ['100vh', '0vh'])
-  const slideTransform11 = useTransform(scrollYProgress, [11/totalSlides, 12/totalSlides], ['100vh', '0vh'])
-  const slideTransform12 = useTransform(scrollYProgress, [12/totalSlides, 13/totalSlides], ['100vh', '0vh'])
-  const slideTransform13 = useTransform(scrollYProgress, [13/totalSlides, 14/totalSlides], ['100vh', '0vh'])
-  const slideTransform14 = useTransform(scrollYProgress, [14/totalSlides, 15/totalSlides], ['100vh', '0vh'])
-  const slideTransform15 = useTransform(scrollYProgress, [15/totalSlides, 16/totalSlides], ['100vh', '0vh'])
-
-  // Map transforms to slides
-  const transforms = useMemo(() => [
-    { y: slideTransform0 },
-    { y: slideTransform1 },
-    { y: slideTransform2 },
-    { y: slideTransform3 },
-    { y: slideTransform4 },
-    { y: slideTransform5 },
-    { y: slideTransform6 },
-    { y: slideTransform7 },
-    { y: slideTransform8 },
-    { y: slideTransform9 },
-    { y: slideTransform10 },
-    { y: slideTransform11 },
-    { y: slideTransform12 },
-    { y: slideTransform13 },
-    { y: slideTransform14 },
-    { y: slideTransform15 }
-  ], [
-    slideTransform0, slideTransform1, slideTransform2, slideTransform3,
-    slideTransform4, slideTransform5, slideTransform6, slideTransform7,
-    slideTransform8, slideTransform9, slideTransform10, slideTransform11,
-    slideTransform12, slideTransform13, slideTransform14, slideTransform15
-  ])
+  const transforms = useSlideTransforms(scrollYProgress, totalSlides)
 
   // Add loading effect on mount
   useEffect(() => {
