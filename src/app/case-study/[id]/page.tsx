@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { use } from 'react'
 
 interface Slide {
   id: number
@@ -11,7 +10,7 @@ interface Slide {
 }
 
 interface PageProps {
-  params: Promise<{ id: string }>
+  params: { id: string }
 }
 
 const caseStudies = {
@@ -29,7 +28,7 @@ export default function CaseStudyPage({ params }: PageProps) {
   const [currentSlide, setCurrentSlide] = useState(0)
   const router = useRouter()
   
-  const { id } = use(params)
+  const { id } = params
   const caseStudy = caseStudies[id as keyof typeof caseStudies]
 
   if (!caseStudy) {
