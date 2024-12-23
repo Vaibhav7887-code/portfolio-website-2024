@@ -172,7 +172,7 @@ export default function Home() {
           transition={{ duration: 0.3 }}
         >
           <div className="w-full px-12 py-8">
-            <Navbar currentSection={currentSection} />
+            <Navbar isLandingPage={true} />
           </div>
         </motion.div>
 
