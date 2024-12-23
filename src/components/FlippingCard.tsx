@@ -10,7 +10,6 @@ interface FlippingCardProps {
   zIndex?: number
   className?: string
   imageOnly?: boolean
-  scale?: number
 }
 
 export default function FlippingCard({ 
@@ -20,14 +19,11 @@ export default function FlippingCard({
   image, 
   zIndex = 0, 
   className = '',
-  imageOnly = false,
-  scale = 1
+  imageOnly = false
 }: FlippingCardProps) {
   const controls = useAnimation()
   const frontVideoRef = useRef<HTMLVideoElement>(null)
   const backVideoRef = useRef<HTMLVideoElement>(null)
-  const isPlayingRef = useRef(true)
-  const [isFlipping, setIsFlipping] = useState(false)
   const [frontVideoLoaded, setFrontVideoLoaded] = useState(false)
   const [backVideoLoaded, setBackVideoLoaded] = useState(false)
   const [videoError, setVideoError] = useState<string | null>(null)
@@ -71,63 +67,6 @@ export default function FlippingCard({
   const dimensions = getBaseDimensions()
   const scaleValue = getScale()
   console.log('Final values:', { dimensions, scaleValue })
-
-  const playVideo = async (videoRef: React.RefObject<HTMLVideoElement>) => {
-    if (!videoRef.current) {
-      console.log('Video ref is null')
-      return
-    }
-
-    try {
-      console.log('Attempting to play video:', videoRef.current.src)
-      
-      // Reset video state
-      videoRef.current.currentTime = 0
-      videoRef.current.muted = true
-      videoRef.current.playbackRate = 1
-
-      // Force play
-      const playPromise = videoRef.current.play()
-      
-      if (playPromise !== undefined) {
-        await playPromise
-        console.log('Video started playing successfully')
-
-        // Wait for video to finish
-        return new Promise<void>((resolve) => {
-          if (!videoRef.current) return resolve()
-
-          // Use both timeupdate and ended events to ensure we catch the end
-          const handleTimeUpdate = () => {
-            if (!videoRef.current) return
-            // Check if we're near the end of the video
-            if (videoRef.current.currentTime >= videoRef.current.duration - 0.1) {
-              console.log('Video near end:', videoRef.current.currentTime, 'of', videoRef.current.duration)
-              videoRef.current.removeEventListener('timeupdate', handleTimeUpdate)
-              resolve()
-            }
-          }
-
-          const handleEnded = () => {
-            console.log('Video ended event fired')
-            if (videoRef.current) {
-              videoRef.current.removeEventListener('ended', handleEnded)
-              videoRef.current.removeEventListener('timeupdate', handleTimeUpdate)
-            }
-            resolve()
-          }
-
-          videoRef.current.addEventListener('timeupdate', handleTimeUpdate)
-          videoRef.current.addEventListener('ended', handleEnded)
-        })
-      }
-    } catch (error) {
-      console.error('Video playback error:', error)
-      // Retry playback after a short delay
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      return playVideo(videoRef)
-    }
-  }
 
   // Force initial video play on mount
   useEffect(() => {
@@ -248,12 +187,10 @@ export default function FlippingCard({
 
             // Flip to back
             console.log('Flipping to back')
-            setIsFlipping(true)
             await controls.start({ 
               rotateY: 180,
               transition: { duration: 0.6 }
             })
-            setIsFlipping(false)
 
             // Play back video
             console.log('Playing back video')
@@ -280,7 +217,6 @@ export default function FlippingCard({
 
               // Flip to front
               console.log('Flipping to front')
-              setIsFlipping(true)
               await controls.start({ 
                 rotateY: 360,
                 transition: { duration: 0.6 }
@@ -288,7 +224,6 @@ export default function FlippingCard({
               
               // Reset rotation without animation
               controls.set({ rotateY: 0 })
-              setIsFlipping(false)
             }
 
             // Schedule next cycle

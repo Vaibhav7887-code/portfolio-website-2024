@@ -2,15 +2,10 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-
-interface Slide {
-  id: number
-  content: string
-  bgColor?: string
-}
+import { use } from 'react'
 
 interface PageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 const caseStudies = {
@@ -28,30 +23,30 @@ export default function CaseStudyPage({ params }: PageProps) {
   const [currentSlide, setCurrentSlide] = useState(0)
   const router = useRouter()
   
-  const { id } = params
+  const { id } = use(params)
   const caseStudy = caseStudies[id as keyof typeof caseStudies]
-
-  if (!caseStudy) {
-    router.push('/404')
-    return null
-  }
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isPresentationMode) return
+      if (!isPresentationMode || !caseStudy) return
       
       if (e.key === 'ArrowRight') {
-        setCurrentSlide(prev => 
+        setCurrentSlide((prev) => 
           prev < caseStudy.slides.length - 1 ? prev + 1 : prev
         )
       } else if (e.key === 'ArrowLeft') {
-        setCurrentSlide(prev => prev > 0 ? prev - 1 : prev)
+        setCurrentSlide((prev) => prev > 0 ? prev - 1 : prev)
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isPresentationMode, caseStudy?.slides?.length])
+  }, [isPresentationMode, caseStudy])
+
+  if (!caseStudy) {
+    router.push('/404')
+    return null
+  }
 
   return (
     <div className="relative">

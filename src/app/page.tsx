@@ -6,13 +6,11 @@ import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import SkillsShowcase from '@/components/SkillsShowcase'
 import FloatingCollage from '@/components/FloatingCollage'
 import CaseStudies from '@/components/CaseStudies'
-import { useMediaQuery, useMobileLandscape } from '../hooks/useMediaQuery'
 
 export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
-  const [scrollY, setScrollY] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
   const [isMobileLandscape, setIsMobileLandscape] = useState(false)
 
@@ -110,19 +108,6 @@ export default function Home() {
     contactRadius,
     contactShadow
   ])
-
-  // Memoize scroll function
-  const scrollToSection = useMemo(() => (section: 'case-studies' | 'contact') => {
-    const scrollPositions = {
-      'case-studies': window.innerHeight * (isMobileLandscape ? 4.2 : isMobile ? 3.2 : 2.8),
-      'contact': window.innerHeight * (isMobileLandscape ? 7.4 : isMobile ? 6.4 : 5.4)
-    }
-    
-    window.scrollTo({
-      top: scrollPositions[section],
-      behavior: 'smooth'
-    })
-  }, [isMobile, isMobileLandscape])
 
   // Optimize session storage check
   useEffect(() => {
@@ -552,7 +537,7 @@ export default function Home() {
                       whileInView={{ opacity: 1 }}
                       transition={{ duration: 0.5 }}
                     >
-                      <span className="font-alice text-[#333333]">Let's </span>
+                      <span className="font-alice text-[#333333]">Let&apos;s </span>
                       <span className="font-sacramento text-[#FF6B00]">Connect</span>
                     </motion.h2>
                     
@@ -604,7 +589,7 @@ export default function Home() {
                     whileInView={{ opacity: 1 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <span className="font-alice text-[#333333]">Let's </span>
+                    <span className="font-alice text-[#333333]">Let&apos;s </span>
                     <span className="font-sacramento text-[#FF6B00]">Connect</span>
                   </motion.h2>
                   
@@ -655,7 +640,7 @@ export default function Home() {
                     whileInView={{ opacity: 1 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <span className="font-alice text-[#333333]">Let's </span>
+                    <span className="font-alice text-[#333333]">Let&apos;s </span>
                     <span className="font-sacramento text-[#FF6B00]">Connect</span>
                   </motion.h2>
                   

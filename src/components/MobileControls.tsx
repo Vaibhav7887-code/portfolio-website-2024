@@ -1,12 +1,19 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
+
+interface TOCItem {
+  title: string
+  slides: string
+  items?: TOCItem[]
+}
 
 interface MobileControlsProps {
   onBack: () => void
   currentSlide: number
   totalSlides: number
-  tocSections: any[]
+  tocSections: TOCItem[]
   scrollToSlide: (slideNumber: number) => void
   imagePath?: string
 }
@@ -188,7 +195,7 @@ export default function MobileControls({
                   </button>
                   {section.items && (
                     <div className="pl-4 mt-2 space-y-2">
-                      {section.items.map((item: any, itemIndex: number) => (
+                      {section.items.map((item, itemIndex) => (
                         <button
                           key={itemIndex}
                           className="w-full text-left text-xs text-gray-600 hover:text-[#FF6B00] transition-colors"
@@ -248,10 +255,13 @@ export default function MobileControls({
                         setActivePanel(null)
                       }}
                     >
-                      <img
+                      <Image
                         src={getImagePath(slideNum)}
                         alt={`Slide ${slideNum}`}
+                        width={200}
+                        height={150}
                         className="w-full h-full object-cover rounded-lg"
+                        priority
                       />
                     </button>
                   )

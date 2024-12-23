@@ -1,6 +1,6 @@
 'use client'
 import { useState, useRef } from 'react'
-import { motion, useScroll } from 'framer-motion'
+import { motion } from 'framer-motion'
 import Link from 'next/link'
 
 interface Project {
@@ -84,7 +84,6 @@ const projects: Project[] = [
 export default function CaseStudies() {
   const [hoveredProject, setHoveredProject] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll()
 
   const scrollToSection = (section: 'case-studies' | 'contact') => {
     const scrollPositions = {

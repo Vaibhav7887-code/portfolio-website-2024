@@ -19,9 +19,6 @@ interface TableOfContentsProps {
 
 export default function TableOfContents({ currentSlide, showUI, sections, scrollToSlide, setShowUI }: TableOfContentsProps) {
   const isMobile = useMediaQuery('(max-width: 768px)')
-
-  if (isMobile) return null
-
   const [expandedSection, setExpandedSection] = useState<number | null>(null)
 
   // Find current section based on slide number
@@ -49,13 +46,15 @@ export default function TableOfContents({ currentSlide, showUI, sections, scroll
     if (currentSectionIndex !== -1 && currentSectionIndex !== expandedSection) {
       setExpandedSection(currentSectionIndex)
     }
-  }, [currentSlide, sections])
+  }, [currentSlide, sections, expandedSection])
 
   // Helper function to check if item is current
   const isItemCurrent = (slideRange: string) => {
     const [start, end] = slideRange.split('-').map(Number)
     return currentSlide >= start && currentSlide <= (end || start)
   }
+
+  if (isMobile) return null
 
   return (
     <motion.div
