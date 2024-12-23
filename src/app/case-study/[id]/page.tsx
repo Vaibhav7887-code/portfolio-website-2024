@@ -8,7 +8,18 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
-const caseStudies = {
+interface CaseStudySlide {
+  id: number
+  content: string
+  bgColor: string
+}
+
+interface CaseStudyData {
+  title: string
+  slides: CaseStudySlide[]
+}
+
+const caseStudies: Record<string, CaseStudyData> = {
   'project1': {
     title: 'Project One',
     slides: [
@@ -22,7 +33,6 @@ export default function CaseStudyPage({ params }: PageProps) {
   const [isPresentationMode, setIsPresentationMode] = useState(false)
   const [currentSlide, setCurrentSlide] = useState(0)
   const router = useRouter()
-  
   const { id } = use(params)
   const caseStudy = caseStudies[id as keyof typeof caseStudies]
 
