@@ -9,21 +9,22 @@ import MobileControls from '@/components/MobileControls'
 import ProjectSwitcher from '@/components/ProjectSwitcher'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 
-function useSlideTransforms(scrollYProgress: MotionValue<number>, totalSlides: number): Array<{ y: MotionValue<string> }> {
-  return useMemo(() => {
-    const transforms = []
+function useSlideTransforms(scrollYProgress: MotionValue<number>, totalSlides: number) {
+  const transforms = useMemo(() => {
+    const inputRange = []
+    const outputRange = []
+    
     for (let i = 0; i < totalSlides; i++) {
-      const startY = i === 0 ? '0vh' : '100vh'
-      transforms.push({
-        y: useTransform(
-          scrollYProgress,
-          [i / totalSlides, (i + 1) / totalSlides],
-          [startY, '0vh']
-        )
-      })
+      inputRange.push(i / totalSlides, (i + 1) / totalSlides)
+      outputRange.push(i === 0 ? '0vh' : '100vh', '0vh')
     }
-    return transforms
+
+    const y = useTransform(scrollYProgress, inputRange, outputRange)
+    
+    return Array(totalSlides).fill(null).map(() => ({ y }))
   }, [scrollYProgress, totalSlides])
+
+  return transforms
 }
 
 const scrollToSection = (section?: 'case-studies' | 'contact') => {

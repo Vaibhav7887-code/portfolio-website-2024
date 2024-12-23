@@ -12,7 +12,6 @@ interface NavItem {
 
 interface NavbarProps {
   isLandingPage?: boolean;
-  currentSection?: 'hero' | 'case-studies' | 'contact';
 }
 
 const projects = [
@@ -24,7 +23,7 @@ const projects = [
   { id: 'brand', name: 'Credixio' }
 ]
 
-export default function Navbar({ isLandingPage = false, currentSection }: NavbarProps) {
+export default function Navbar({ isLandingPage = false }: NavbarProps) {
   const isMobile = useMediaQuery('(max-width: 768px)')
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
   const [showDropdown, setShowDropdown] = useState(false)
