@@ -169,10 +169,20 @@
         video.onerror = () => resolve();
       });
 
+      // Asset loading effect with fallback timeout
+      const fallbackTimeout = setTimeout(() => {
+        console.warn('Fallback timeout reached; dismissing loading screen.');
+        setIsLoading(false);
+      }, 5000);
+
       Promise.all([
         ...imagesToLoad.map(loadImage),
         ...videosToLoad.map(loadVideo)
       ]).then(() => {
+        clearTimeout(fallbackTimeout);
+        setIsLoading(false);
+      }).catch(() => {
+        clearTimeout(fallbackTimeout);
         setIsLoading(false);
       });
     }, []);
