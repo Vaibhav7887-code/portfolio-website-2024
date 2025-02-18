@@ -33,7 +33,7 @@ const skills: Skill[] = [
     name: 'Motion', 
     color: '#FFB899', 
     description: 'Motion graphics & animations',
-    image: '/placeholder-orange.jpg'
+    image: '/Motion.jpg'
   },
   { 
     name: 'Photography', 
