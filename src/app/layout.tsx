@@ -4,6 +4,7 @@ import { Alice, Sacramento } from 'next/font/google'
 import { Open_Sans } from 'next/font/google'
 import CustomCursor from '@/components/CustomCursor'
 import './globals.css'
+import { Analytics } from '@vercel/analytics/react'
 
 const alice = Alice({
   weight: '400',
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body>
         <CustomCursor />
         {children}
+        <Analytics />
       </body>
     </html>
   )
