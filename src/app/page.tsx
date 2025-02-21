@@ -209,10 +209,10 @@
           transition={{ duration: 0.8, delay: 0.5 }}
         >
           <div className="mb-2 sm:mb-0">
-            <span className="font-alice text-[#333333] text-[52px] md:text-[60px] lg:text-[120px]">UX</span>{' '}
-            <span className="font-sacramento text-[#FF6B00] text-[52px] md:text-[60px] lg:text-[120px]">Design</span>{' '}
+            <span className="font-alice text-[#333333] text-[52px] md:text-[60px] lg:text-[120px]">User</span>{' '}
+            <span className="font-sacramento text-[#FF6B00] text-[52px] md:text-[60px] lg:text-[120px]">Experience</span>{' '}
           </div>
-          <span className="font-alice text-[#333333] text-[52px] md:text-[60px] lg:text-[120px]">Engineer</span>
+          <span className="font-alice text-[#333333] text-[52px] md:text-[60px] lg:text-[120px]">Designer</span>
         </motion.h1>
 
         <div className={`flex items-center justify-center relative ${isMobile ? 'w-full' : ''}`}>
