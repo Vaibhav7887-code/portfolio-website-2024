@@ -356,7 +356,7 @@ export default function Home() {
   // Add analytics tracking
   useEffect(() => {
     const startTime = performance.now()
-    let scrollDepthFlags = { 25: false, 50: false, 75: false }
+    const scrollDepthFlags = { 25: false, 50: false, 75: false }
 
     // Track scroll depth (optimized to track each threshold only once)
     const trackScroll = () => {
