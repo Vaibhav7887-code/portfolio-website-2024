@@ -5,6 +5,7 @@ import { Open_Sans } from 'next/font/google'
 import CustomCursor from '@/components/CustomCursor'
 import './globals.css'
 import { Analytics } from '@vercel/analytics/react'
+import { track } from '@vercel/analytics'
 
 const alice = Alice({
   weight: '400',
@@ -28,6 +29,12 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  // Add performance tracking
+  if (typeof window !== 'undefined') {
+    const loadTime = window.performance.now()
+    track('page_load', { loadTime })
+  }
+
   return (
     <html lang="en" className={`${alice.variable} ${sacramento.variable} ${openSans.variable}`}>
       <body>

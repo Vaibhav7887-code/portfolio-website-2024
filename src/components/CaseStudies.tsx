@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { track } from '@vercel/analytics'
 
 interface Project {
   id: string
@@ -97,6 +98,13 @@ export default function CaseStudies() {
     })
   }
 
+  const trackCaseStudyClick = (projectId: string) => {
+    track('case_study_click', {
+      projectId,
+      fromSection: 'case_studies'
+    })
+  }
+
   return (
     <motion.div 
       ref={containerRef}
@@ -137,6 +145,8 @@ export default function CaseStudies() {
                 if (!['tata-motors', 'visa-idfc', 'vala-heritage', 'photography', 'illustrations'].includes(project.id)) {
                   e.preventDefault()
                   scrollToSection('case-studies')
+                } else {
+                  trackCaseStudyClick(project.id)
                 }
               }}
             >
