@@ -412,7 +412,7 @@ export default function Home() {
       {/* Floating CTAs */}
       <FloatingCTAs />
     </motion.section>
-  ), [transforms.heroOpacity, isMobile, isMobileLandscape])
+  ), [transforms.heroOpacity, isMobile, isMobileLandscape, FloatingCTAs])
 
   // Add analytics tracking
   useEffect(() => {
@@ -531,7 +531,7 @@ export default function Home() {
       return () => {
         window.removeEventListener('keydown', handleKeyDown);
       };
-    }, []);
+    }, [nextSlide, prevSlide]);
     
     // Auto-rotation effect
     useEffect(() => {
@@ -546,7 +546,7 @@ export default function Home() {
       return () => {
         resetTimeout();
       };
-    }, [currentIndex, isPaused]);
+    }, [currentIndex, isPaused, nextSlide, resetTimeout]);
     
     const testimonial = testimonials[currentIndex];
     
@@ -657,7 +657,7 @@ export default function Home() {
                 
                 {testimonial.quote ? (
                   <p className="text-sm text-gray-700 italic">
-                    "{testimonial.quote}"
+                    &ldquo;{testimonial.quote}&rdquo;
                   </p>
                 ) : (
                   <>
@@ -665,7 +665,7 @@ export default function Home() {
                       <>
                         <h5 className="text-sm font-bold text-gray-700 mb-2">Leadership abilities:</h5>
                         <p className="text-sm text-gray-700 mb-3">
-                          "{testimonial.leadership}"
+                          &ldquo;{testimonial.leadership}&rdquo;
                         </p>
                         
                         <h5 className="text-sm font-bold text-gray-700 mb-2">Key strengths:</h5>
@@ -679,14 +679,14 @@ export default function Home() {
                         
                         <h5 className="text-sm font-bold text-gray-700 mb-2">Impact:</h5>
                         <p className="text-sm text-gray-700">
-                          "{testimonial.impact}"
+                          &ldquo;{testimonial.impact}&rdquo;
                         </p>
                       </>
                     )}
                     
                     {compact && (
                       <p className="text-sm text-gray-700">
-                        "{testimonial.impact || testimonial.leadership.split('.')[0]}."
+                        &ldquo;{testimonial.impact || testimonial.leadership.split('.')[0]}.&rdquo;
                       </p>
                     )}
                   </>
