@@ -33,7 +33,7 @@ export default function Home() {
     offset: ["start", isMobileLandscape ? "end end" : "end start"]
   })
 
-  // Move transform calculations outside useMemo
+  // Move transforms calculations outside useMemo
   const aboutY = useTransform(scrollYProgress, [0, 0.15], ['100vh', '0vh'])
   const aboutScale = useTransform(scrollYProgress, [0, 0.15], [0.9, 1])
   const aboutRadius = useTransform(scrollYProgress, [0, 0.15], [30, 0])
@@ -109,6 +109,64 @@ export default function Home() {
     contactRadius,
     contactShadow
   ])
+  
+  // Floating CTAs component - Moved above HeroContent
+  const FloatingCTAs = () => {
+    const [isInCaseStudiesSection, setIsInCaseStudiesSection] = useState(false)
+    
+    // Track scroll position to determine if we're in the case studies section
+    useEffect(() => {
+      const handleScroll = () => {
+        // Check if we're in the case studies section based on scroll position
+        // These values should match the case studies section scroll triggers
+        const scrollPosition = window.scrollY / window.innerHeight
+        const inCaseStudiesSection = scrollPosition >= 0.35 && scrollPosition <= 0.8
+        setIsInCaseStudiesSection(inCaseStudiesSection)
+      }
+      
+      window.addEventListener('scroll', handleScroll)
+      return () => window.removeEventListener('scroll', handleScroll)
+    }, [])
+    
+    if (isInCaseStudiesSection) return null
+    
+    return (
+      <motion.div 
+        className="fixed bottom-6 right-6 flex flex-col gap-4 z-50"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 2 }}
+      >
+        <motion.button
+          onClick={() => {
+            const caseStudiesSection = window.innerHeight * (isMobileLandscape ? 4.2 : isMobile ? 3.2 : 2.8)
+            window.scrollTo({
+              top: caseStudiesSection,
+              behavior: 'smooth'
+            })
+            track('cta_click', { button: 'case_studies' })
+          }}
+          className="bg-[#FF6B00] text-white font-alice py-2 px-4 rounded-full shadow-lg flex items-center justify-center whitespace-nowrap hover:bg-[#e56200] transition-colors"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          Case Studies
+        </motion.button>
+        
+        <motion.a
+          href="https://design.system.vaibhav.design/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-[#333333] text-white font-alice py-2 px-4 rounded-full shadow-lg flex items-center justify-center whitespace-nowrap hover:bg-black transition-colors"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => track('cta_click', { button: 'design_system' })}
+        >
+          Interactive Design System
+        </motion.a>
+      </motion.div>
+    )
+  }
 
   // Optimize session storage check
   useEffect(() => {
@@ -350,6 +408,9 @@ export default function Home() {
       >
         <SkillsShowcase />
       </motion.div>
+      
+      {/* Floating CTAs */}
+      <FloatingCTAs />
     </motion.section>
   ), [transforms.heroOpacity, isMobile, isMobileLandscape])
 
@@ -402,6 +463,243 @@ export default function Home() {
       window.removeEventListener('beforeunload', trackTimeSpent)
     }
   }, [])
+
+  // Testimonials Carousel Component
+  const TestimonialsCarousel = ({ compact = false }) => {
+    const testimonials = [
+      {
+        name: "Prateek Bandyopadhyay",
+        role: "Lead UI Designer",
+        linkedin: "https://www.linkedin.com/in/prateek-bandyopadhyay/",
+        leadership: "You lead the project with complete ownership. You are a good negotiator with clients. You managed the project with good efficiency. For example, with so much happening in the project, you made sure we never worked over the weekends. Neither did we have late evening calls.",
+        strengths: ["Proactive", "Critical thinker", "Efficiency", "Good negotiator"],
+        impact: "You drive the project that we are working on. You set the expectations right with the client with clear communication and also managed to build trust with the client."
+      },
+      {
+        name: "Reet Singh Tomar",
+        role: "UX Designer",
+        linkedin: "https://www.linkedin.com/in/reetsinghtomar1601/",
+        leadership: "Since the day one, Vaibhav took responsibility very diligently. He has all the skills that a leader needs, be it decision-making or guiding someone when stuck. The best thing about his work is his honest response to the work and never hesitating to point out the right thing. At the same time, he gives space to allies to explore and listens to them with an open mind.",
+        strengths: ["Attention to detail", "Leadership skills", "Respecting others"],
+        impact: "Made the process of problem-solving easy by contributing actively in brainstorming and giving accurate feedback."
+      },
+      {
+        name: "Siddharth Sury",
+        role: "UX Designer",
+        linkedin: "https://www.linkedin.com/in/sidauski/",
+        quote: "Handles pressure like a pro, doesn't flinch at the face of adversity that the client throws at him."
+      }
+    ];
+    
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [isPaused, setIsPaused] = useState(false);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    
+    const resetTimeout = () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+    
+    const nextSlide = () => {
+      setCurrentIndex((prevIndex) => 
+        prevIndex === testimonials.length - 1 ? 0 : prevIndex + 1
+      );
+    };
+    
+    const prevSlide = () => {
+      setCurrentIndex((prevIndex) => 
+        prevIndex === 0 ? testimonials.length - 1 : prevIndex - 1
+      );
+    };
+    
+    useEffect(() => {
+      // Add keyboard event listeners for arrow key navigation
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'ArrowRight') {
+          nextSlide();
+          setIsPaused(true);
+          setTimeout(() => setIsPaused(false), 5000); // Resume auto-rotation after 5 seconds
+        } else if (e.key === 'ArrowLeft') {
+          prevSlide();
+          setIsPaused(true);
+          setTimeout(() => setIsPaused(false), 5000); // Resume auto-rotation after 5 seconds
+        }
+      };
+      
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    }, []);
+    
+    // Auto-rotation effect
+    useEffect(() => {
+      resetTimeout();
+      
+      if (!isPaused) {
+        timeoutRef.current = setTimeout(() => {
+          nextSlide();
+        }, 4000); // Rotate every 4 seconds
+      }
+      
+      return () => {
+        resetTimeout();
+      };
+    }, [currentIndex, isPaused]);
+    
+    const testimonial = testimonials[currentIndex];
+    
+    const handleMouseEnter = () => {
+      setIsPaused(true);
+    };
+    
+    const handleMouseLeave = () => {
+      setIsPaused(false);
+    };
+    
+    // Calculate a proper height for the container based on content
+    const containerHeight = compact ? 'min-h-[240px]' : 'min-h-[380px]';
+    
+    return (
+      <div 
+        className={`relative ${compact ? 'w-full sm:w-[350px] md:w-[400px]' : 'w-full sm:w-[450px] md:w-[550px]'} mx-auto`}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {/* Heading is completely separate from the card container */}
+        <motion.h3
+          className={`${compact ? 'text-2xl' : 'text-3xl md:text-4xl'} text-center mb-4`}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <span className="font-alice text-[#333333]">What </span>
+          <span className="font-sacramento text-[#FF6B00]">People Say</span>
+        </motion.h3>
+        
+        {/* Navigation dots positioned below heading and above card */}
+        <div className="flex justify-center gap-2 mb-4">
+          {testimonials.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                setCurrentIndex(index);
+                setIsPaused(true);
+                setTimeout(() => setIsPaused(false), 5000);
+              }}
+              className={`w-2 h-2 rounded-full ${
+                index === currentIndex ? 'bg-[#FF6B00]' : 'bg-gray-300'
+              } transition-colors`}
+              aria-label={`Go to testimonial ${index + 1}`}
+            />
+          ))}
+        </div>
+        
+        {/* Fixed position container for testimonial cards */}
+        <div className={`relative ${containerHeight}`}>
+          {/* Navigation arrows positioned at fixed distance from top */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              prevSlide();
+              setIsPaused(true);
+              setTimeout(() => setIsPaused(false), 5000);
+            }}
+            className="absolute top-12 -left-4 w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-md hover:bg-gray-50 z-10"
+            aria-label="Previous testimonial"
+          >
+            <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 1L1 5L5 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              nextSlide();
+              setIsPaused(true);
+              setTimeout(() => setIsPaused(false), 5000);
+            }}
+            className="absolute top-12 -right-4 w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-md hover:bg-gray-50 z-10"
+            aria-label="Next testimonial"
+          >
+            <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 1L5 5L1 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          
+          {/* Testimonial cards that are top-aligned and animate in/out */}
+          <div className="absolute top-0 left-0 w-full">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentIndex}
+                className="bg-white rounded-lg shadow-md p-6 border border-gray-100 w-full"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="flex items-center mb-4">
+                  <div>
+                    <h4 className="font-alice text-lg">{testimonial.name}</h4>
+                    <p className="text-sm text-gray-600">{testimonial.role}</p>
+                    <a 
+                      href={testimonial.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-[#FF6B00] hover:underline mt-1 inline-block"
+                    >
+                      LinkedIn Profile
+                    </a>
+                  </div>
+                </div>
+                
+                {testimonial.quote ? (
+                  <p className="text-sm text-gray-700 italic">
+                    "{testimonial.quote}"
+                  </p>
+                ) : (
+                  <>
+                    {!compact && (
+                      <>
+                        <h5 className="text-sm font-bold text-gray-700 mb-2">Leadership abilities:</h5>
+                        <p className="text-sm text-gray-700 mb-3">
+                          "{testimonial.leadership}"
+                        </p>
+                        
+                        <h5 className="text-sm font-bold text-gray-700 mb-2">Key strengths:</h5>
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {testimonial.strengths?.map((strength) => (
+                            <span key={strength} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                              {strength}
+                            </span>
+                          ))}
+                        </div>
+                        
+                        <h5 className="text-sm font-bold text-gray-700 mb-2">Impact:</h5>
+                        <p className="text-sm text-gray-700">
+                          "{testimonial.impact}"
+                        </p>
+                      </>
+                    )}
+                    
+                    {compact && (
+                      <p className="text-sm text-gray-700">
+                        "{testimonial.impact || testimonial.leadership.split('.')[0]}."
+                      </p>
+                    )}
+                  </>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+          
+          {/* Remove the old navigation dots that were at the bottom */}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -498,14 +796,24 @@ export default function Home() {
                       <span className="font-sacramento text-[#FF6B00]">Vaibhav</span>
                     </h2>
                     <p className="font-opensans text-base leading-relaxed text-gray-700">
-                      I blend design and technology to create intuitive digital experiences. 
-                      My playground is the intersection of UX and engineering, where I experiment 
-                      with tools and technologies to bring ideas to life.
+                      I Research, I design, I code.
                     </p>
                     <p className="font-opensans text-base leading-relaxed text-gray-700 mt-4">
-                      What drives me is solving problems and coming up with elegant solutions. 
-                      Through motion, code, and visual design, I craft experiences that feel 
-                      natural and engaging.
+                      With over 5 years of experience as a UX Designer designing for fortune 500 companies like 
+                      <a href="https://www.tatamotors.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center mx-1 px-2 py-1 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors">Tata</a>, 
+                      <a href="https://www.visa.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center mx-1 px-2 py-1 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors">Visa</a>, 
+                      <a href="https://www.hdfc.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center mx-1 px-2 py-1 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors">HDFC</a> etc, 
+                      teaching myself 
+                      <span className="relative group inline-flex items-center justify-center mx-1 px-2 py-1 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors">
+                        Coding
+                        <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-white rounded-lg shadow-lg text-xs w-52 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                          Built with Next.js, React, TypeScript, Tailwind CSS, and Framer Motion
+                        </span>
+                      </span>, 
+                      <span className="inline-flex items-center justify-center mx-1 px-2 py-1 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors">3D modeling and animation</span>, 
+                      <span className="inline-flex items-center justify-center mx-1 px-2 py-1 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors">Illustration</span>, 
+                      <span className="inline-flex items-center justify-center mx-1 px-2 py-1 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors">Photography</span> 
+                      and more, I have evolved my design philosophy to a multi-disciplinary approach, where I can design and code enabling closer collaboration with designers, Business teams, PMs and Engineers.
                     </p>
                   </div>
                   <div className="flex-1 flex justify-center">
@@ -531,14 +839,23 @@ export default function Home() {
                           <span className="font-sacramento text-[#FF6B00]">Vaibhav</span>
                         </h2>
                         <p className="font-opensans text-base leading-relaxed text-gray-700 text-center">
-                          I blend design and technology to create intuitive digital experiences. 
-                          My playground is the intersection of UX and engineering, where I experiment 
-                          with tools and technologies to bring ideas to life.
+                          I Research, I design, I code.
                         </p>
                         <p className="font-opensans text-base leading-relaxed text-gray-700 mt-3 text-center">
-                          What drives me is solving problems and coming up with elegant solutions. 
-                          Through motion, code, and visual design, I craft experiences that feel 
-                          natural and engaging.
+                          With over 5 years of experience as a UX Designer designing for fortune 500 companies like 
+                          <a href="https://www.tatamotors.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center mx-1 px-2 py-1 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors">Tata</a>, 
+                          <a href="https://www.visa.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center mx-1 px-2 py-1 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors">Visa</a>, 
+                          <a href="https://www.hdfc.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center mx-1 px-2 py-1 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors">HDFC</a> etc, teaching myself 
+                          <span className="relative group inline-flex items-center justify-center mx-1 px-2 py-1 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors">
+                            Coding
+                            <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-white rounded-lg shadow-lg text-xs w-52 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                              Built with Next.js, React, TypeScript, Tailwind CSS, and Framer Motion
+                            </span>
+                          </span>, 
+                          <span className="inline-flex items-center justify-center mx-1 px-2 py-1 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors">3D modeling</span>, 
+                          <span className="inline-flex items-center justify-center mx-1 px-2 py-1 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors">Illustration</span>, 
+                          <span className="inline-flex items-center justify-center mx-1 px-2 py-1 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors">Photography</span> 
+                          and more, I have evolved my design philosophy to a multi-disciplinary approach, where I can design and code enabling closer collaboration with designers, Business teams, PMs and Engineers.
                         </p>
                       </div>
                     </div>
@@ -553,14 +870,23 @@ export default function Home() {
                           <span className="font-sacramento text-[#FF6B00]">Vaibhav</span>
                         </h2>
                         <p className="font-opensans text-xs sm:text-sm leading-relaxed text-gray-700">
-                          I blend design and technology to create intuitive digital experiences. 
-                          My playground is the intersection of UX and engineering, where I experiment 
-                          with tools and technologies to bring ideas to life.
+                          I Research, I design, I code.
                         </p>
                         <p className="font-opensans text-xs sm:text-sm leading-relaxed text-gray-700 mt-2">
-                          What drives me is solving problems and coming up with elegant solutions. 
-                          Through motion, code, and visual design, I craft experiences that feel 
-                          natural and engaging.
+                          With over 5 years of experience as a UX Designer designing for fortune 500 companies like 
+                          <a href="https://www.tatamotors.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center mx-1 px-1 py-0.5 text-xs bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors">Tata</a>, 
+                          <a href="https://www.visa.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center mx-1 px-1 py-0.5 text-xs bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors">Visa</a>, 
+                          <a href="https://www.hdfc.com/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center mx-1 px-1 py-0.5 text-xs bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors">HDFC</a> etc, teaching myself 
+                          <span className="relative group inline-flex items-center justify-center mx-1 px-1 py-0.5 text-xs bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors">
+                            Coding
+                            <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-white rounded-lg shadow-lg text-xs w-52 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                              Built with Next.js, React, TypeScript, Tailwind CSS, and Framer Motion
+                            </span>
+                          </span>, 
+                          <span className="inline-flex items-center justify-center mx-1 px-1 py-0.5 text-xs bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors">3D modeling</span>, 
+                          <span className="inline-flex items-center justify-center mx-1 px-1 py-0.5 text-xs bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors">Illustration</span>, 
+                          <span className="inline-flex items-center justify-center mx-1 px-1 py-0.5 text-xs bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors">Photography</span> 
+                          and more I have evolved my design philosophy to a multi-disciplinary approach, where I can design and code enabling closer collaboration with designers, Business teams, PMs and Engineers.
                         </p>
                       </div>
                       <div className="w-[40%] flex items-center justify-center">
@@ -612,262 +938,288 @@ export default function Home() {
               }}
             >
               {!isMobile ? (
-                // Desktop Contact Layout
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="text-center">
-                    <motion.h2 
-                      className="text-6xl mb-8"
-                      initial={{ opacity: 0 }}
-                      whileInView={{ opacity: 1 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <span className="font-alice text-[#333333]">Let&apos;s </span>
-                      <span className="font-sacramento text-[#FF6B00]">Connect</span>
-                    </motion.h2>
-                    
-                    <motion.div
-                      className="mb-12"
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.2 }}
-                    >
-                      <a 
-                        href="mailto:contact@vaibhavsharma.design" 
-                        className="text-2xl font-alice text-gray-700 hover:text-[#FF6B00] transition-colors"
-                      >
-                        contact@vaibhavsharma.design
-                      </a>
-                    </motion.div>
+                // Desktop Contact Layout - Two Column Design
+                <>
+                  <div className="flex-1 flex">
+                    {/* Left Column - Contact Info */}
+                    <div className="w-1/2 flex items-center justify-center">
+                      <div className="text-center max-w-md">
+                        <motion.h2 
+                          className="text-6xl mb-8"
+                          initial={{ opacity: 0 }}
+                          whileInView={{ opacity: 1 }}
+                          transition={{ duration: 0.5 }}
+                        >
+                          <span className="font-alice text-[#333333]">Let&apos;s </span>
+                          <span className="font-sacramento text-[#FF6B00]">Connect</span>
+                        </motion.h2>
+                        
+                        <motion.div
+                          className="mb-12"
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: 0.2 }}
+                        >
+                          <a 
+                            href="mailto:contact@vaibhavsharma.design" 
+                            className="text-2xl font-alice text-gray-700 hover:text-[#FF6B00] transition-colors"
+                          >
+                            contact@vaibhavsharma.design
+                          </a>
+                        </motion.div>
 
-                    <motion.div
-                      className="flex items-center justify-center gap-8"
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.4 }}
-                    >
-                      <a 
-                        href="https://linkedin.com/in/your-profile" 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-lg font-opensans text-gray-600 hover:text-[#FF6B00] transition-colors"
-                      >
-                        LinkedIn
-                      </a>
-                      <a 
-                        href="https://behance.net/your-profile" 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-lg font-opensans text-gray-600 hover:text-[#FF6B00] transition-colors"
-                      >
-                        Behance
-                      </a>
-                    </motion.div>
+                        <motion.div
+                          className="flex justify-center gap-8"
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: 0.4 }}
+                        >
+                          <a 
+                            href="https://linkedin.com/in/your-profile" 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-opensans text-gray-600 hover:text-[#FF6B00] transition-colors"
+                          >
+                            LinkedIn
+                          </a>
+                          <a 
+                            href="https://behance.net/your-profile" 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-opensans text-gray-600 hover:text-[#FF6B00] transition-colors"
+                          >
+                            Behance
+                          </a>
+                        </motion.div>
+                      </div>
+                    </div>
+                    
+                    {/* Right Column - Testimonials Carousel */}
+                    <div className="w-3/5 flex items-center justify-center px-6">
+                      <TestimonialsCarousel />
+                    </div>
                   </div>
-                </div>
+                  
+                  {/* Desktop Footer */}
+                  <footer className="h-24 border-t border-gray-100">
+                    <div className="max-w-7xl mx-auto px-8 h-full flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-opensans text-gray-500">
+                          © 2024 Vaibhav Sharma. All rights reserved.
+                        </p>
+                        <p className="text-sm font-opensans text-gray-400 mt-1">
+                          Designed in Figma, Blender 3D, Illustrator • Built with Next.js, Framer Motion & Tailwind CSS
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <a 
+                          href="https://linkedin.com/in/your-profile" 
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm font-opensans text-gray-500 hover:text-[#FF6B00] transition-colors"
+                        >
+                          LinkedIn
+                        </a>
+                        <a 
+                          href="https://behance.net/your-profile" 
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm font-opensans text-gray-500 hover:text-[#FF6B00] transition-colors"
+                        >
+                          Behance
+                        </a>
+                      </div>
+                    </div>
+                  </footer>
+                </>
               ) : !isMobileLandscape ? (
                 // Mobile Portrait Layout
-                <div className="flex-1 flex flex-col justify-center px-6">
-                  <motion.h2 
-                    className="text-3xl mb-6 text-center"
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <span className="font-alice text-[#333333]">Let&apos;s </span>
-                    <span className="font-sacramento text-[#FF6B00]">Connect</span>
-                  </motion.h2>
-                  
-                  <motion.div
-                    className="mb-6 text-center"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                  >
-                    <a 
-                      href="mailto:contact@vaibhavsharma.design" 
-                      className="text-base font-alice text-gray-700 hover:text-[#FF6B00] transition-colors break-words"
-                    >
-                      contact@vaibhavsharma.design
-                    </a>
-                  </motion.div>
+                <>
+                  <div className="flex-1 flex flex-col min-h-[90vh] justify-center px-4">
+                    <div className="text-center mb-12">
+                      <motion.h2 
+                        className="text-4xl mb-4"
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <span className="font-alice text-[#333333]">Let&apos;s </span>
+                        <span className="font-sacramento text-[#FF6B00]">Connect</span>
+                      </motion.h2>
+                      
+                      <motion.div
+                        className="mb-6 text-center"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                      >
+                        <a 
+                          href="mailto:contact@vaibhavsharma.design" 
+                          className="text-base font-alice text-gray-700 hover:text-[#FF6B00] transition-colors break-words"
+                        >
+                          contact@vaibhavsharma.design
+                        </a>
+                      </motion.div>
 
-                  <motion.div
-                    className="flex justify-center gap-8"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.4 }}
-                  >
-                    <a 
-                      href="https://linkedin.com/in/your-profile" 
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-opensans text-gray-600 hover:text-[#FF6B00] transition-colors"
-                    >
-                      LinkedIn
-                    </a>
-                    <a 
-                      href="https://behance.net/your-profile" 
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-opensans text-gray-600 hover:text-[#FF6B00] transition-colors"
-                    >
-                      Behance
-                    </a>
-                  </motion.div>
-                </div>
+                      <motion.div
+                        className="flex justify-center gap-8"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.4 }}
+                      >
+                        <a 
+                          href="https://linkedin.com/in/your-profile" 
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm font-opensans text-gray-600 hover:text-[#FF6B00] transition-colors"
+                        >
+                          LinkedIn
+                        </a>
+                        <a 
+                          href="https://behance.net/your-profile" 
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm font-opensans text-gray-600 hover:text-[#FF6B00] transition-colors"
+                        >
+                          Behance
+                        </a>
+                      </motion.div>
+                    </div>
+                    
+                    {/* Mobile Testimonials Carousel */}
+                    <div className="mb-12 w-full">
+                      <TestimonialsCarousel />
+                    </div>
+                  </div>
+                
+                  {/* Mobile Portrait Footer */}
+                  <footer className="border-t border-gray-100 py-6 px-4">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="flex flex-col items-center">
+                        <p className="text-xs font-opensans text-gray-500 text-center">
+                          © 2024 Vaibhav Sharma. All rights reserved.
+                        </p>
+                        <p className="text-xs font-opensans text-gray-400 mt-2 text-center">
+                          Designed in Figma, Blender 3D, Illustrator
+                        </p>
+                        <p className="text-xs font-opensans text-gray-400 mt-1 text-center">
+                          Built with Next.js, Framer Motion & Tailwind CSS
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-6 mt-2">
+                        <a 
+                          href="https://linkedin.com/in/your-profile" 
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-opensans text-gray-500 hover:text-[#FF6B00] transition-colors"
+                        >
+                          LinkedIn
+                        </a>
+                        <a 
+                          href="https://behance.net/your-profile" 
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-opensans text-gray-500 hover:text-[#FF6B00] transition-colors"
+                        >
+                          Behance
+                        </a>
+                      </div>
+                    </div>
+                  </footer>
+                </>
               ) : (
                 // Mobile Landscape Layout
-                <div className="flex-1 flex flex-col justify-center px-6">
-                  <motion.h2 
-                    className="text-3xl mb-6 text-center"
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <span className="font-alice text-[#333333]">Let&apos;s </span>
-                    <span className="font-sacramento text-[#FF6B00]">Connect</span>
-                  </motion.h2>
-                  
-                  <motion.div
-                    className="mb-6 text-center"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                  >
-                    <a 
-                      href="mailto:contact@vaibhavsharma.design" 
-                      className="text-base font-alice text-gray-700 hover:text-[#FF6B00] transition-colors break-words"
-                    >
-                      contact@vaibhavsharma.design
-                    </a>
-                  </motion.div>
+                <>
+                  <div className="flex justify-between items-center h-[70vh] px-8">
+                    {/* Left side - Contact */}
+                    <div className="w-1/2">
+                      <motion.h2 
+                        className="text-3xl mb-3"
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <span className="font-alice text-[#333333]">Let&apos;s </span>
+                        <span className="font-sacramento text-[#FF6B00]">Connect</span>
+                      </motion.h2>
+                      
+                      <motion.div
+                        className="mb-4"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                      >
+                        <a 
+                          href="mailto:contact@vaibhavsharma.design" 
+                          className="text-sm font-alice text-gray-700 hover:text-[#FF6B00] transition-colors"
+                        >
+                          contact@vaibhavsharma.design
+                        </a>
+                      </motion.div>
 
-                  <motion.div
-                    className="flex justify-center gap-8"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.4 }}
-                  >
-                    <a 
-                      href="https://linkedin.com/in/your-profile" 
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-opensans text-gray-600 hover:text-[#FF6B00] transition-colors"
-                    >
-                      LinkedIn
-                    </a>
-                    <a 
-                      href="https://behance.net/your-profile" 
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-opensans text-gray-600 hover:text-[#FF6B00] transition-colors"
-                    >
-                      Behance
-                    </a>
-                  </motion.div>
-                </div>
-              )}
-
-              {/* Footer - Separate mobile and desktop layouts */}
-              {!isMobile ? (
-                // Desktop Footer
-                <footer className="h-24 border-t border-gray-100">
-                  <div className="max-w-7xl mx-auto px-8 h-full flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-opensans text-gray-500">
-                        © 2024 Vaibhav Sharma. All rights reserved.
-                      </p>
-                      <p className="text-sm font-opensans text-gray-400 mt-1">
-                        Designed in Figma, Blender 3D, Illustrator • Built with Next.js, Framer Motion & Tailwind CSS
-                      </p>
+                      <motion.div
+                        className="flex gap-4"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.4 }}
+                      >
+                        <a 
+                          href="https://linkedin.com/in/your-profile" 
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-opensans text-gray-600 hover:text-[#FF6B00] transition-colors"
+                        >
+                          LinkedIn
+                        </a>
+                        <a 
+                          href="https://behance.net/your-profile" 
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-opensans text-gray-600 hover:text-[#FF6B00] transition-colors"
+                        >
+                          Behance
+                        </a>
+                      </motion.div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <a 
-                        href="https://linkedin.com/in/your-profile" 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-opensans text-gray-500 hover:text-[#FF6B00] transition-colors"
-                      >
-                        LinkedIn
-                      </a>
-                      <a 
-                        href="https://behance.net/your-profile" 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-opensans text-gray-500 hover:text-[#FF6B00] transition-colors"
-                      >
-                        Behance
-                      </a>
+                    
+                    {/* Right side - Testimonials */}
+                    <div className="w-2/3">
+                      <TestimonialsCarousel compact />
                     </div>
                   </div>
-                </footer>
-              ) : !isMobileLandscape ? (
-                // Mobile Portrait Footer
-                <footer className="border-t border-gray-100 py-6 px-4">
-                  <div className="flex flex-col items-center gap-4">
-                    <div className="flex flex-col items-center">
-                      <p className="text-xs font-opensans text-gray-500 text-center">
-                        © 2024 Vaibhav Sharma. All rights reserved.
-                      </p>
-                      <p className="text-xs font-opensans text-gray-400 mt-2 text-center">
-                        Designed in Figma, Blender 3D, Illustrator
-                      </p>
-                      <p className="text-xs font-opensans text-gray-400 mt-1 text-center">
-                        Built with Next.js, Framer Motion & Tailwind CSS
-                      </p>
+                
+                  {/* Mobile Landscape Footer */}
+                  <footer className="border-t border-gray-100 py-4 px-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="text-xs font-opensans text-gray-500">
+                          © 2024 Vaibhav Sharma. All rights reserved.
+                        </p>
+                        <p className="text-xs font-opensans text-gray-400 mt-1">
+                          Designed in Figma, Blender 3D, Illustrator • Built with Next.js, Framer Motion & Tailwind CSS
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <a 
+                          href="https://linkedin.com/in/your-profile" 
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-opensans text-gray-500 hover:text-[#FF6B00] transition-colors"
+                        >
+                          LinkedIn
+                        </a>
+                        <a 
+                          href="https://behance.net/your-profile" 
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-opensans text-gray-500 hover:text-[#FF6B00] transition-colors"
+                        >
+                          Behance
+                        </a>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-6 mt-2">
-                      <a 
-                        href="https://linkedin.com/in/your-profile" 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs font-opensans text-gray-500 hover:text-[#FF6B00] transition-colors"
-                      >
-                        LinkedIn
-                      </a>
-                      <a 
-                        href="https://behance.net/your-profile" 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs font-opensans text-gray-500 hover:text-[#FF6B00] transition-colors"
-                      >
-                        Behance
-                      </a>
-                    </div>
-                  </div>
-                </footer>
-              ) : (
-                // Mobile Landscape Footer
-                <footer className="border-t border-gray-100 py-4 px-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-xs font-opensans text-gray-500">
-                        © 2024 Vaibhav Sharma. All rights reserved.
-                      </p>
-                      <p className="text-xs font-opensans text-gray-400 mt-1">
-                        Designed in Figma, Blender 3D, Illustrator • Built with Next.js, Framer Motion & Tailwind CSS
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <a 
-                        href="https://linkedin.com/in/your-profile" 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs font-opensans text-gray-500 hover:text-[#FF6B00] transition-colors"
-                      >
-                        LinkedIn
-                      </a>
-                      <a 
-                        href="https://behance.net/your-profile" 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs font-opensans text-gray-500 hover:text-[#FF6B00] transition-colors"
-                      >
-                        Behance
-                      </a>
-                    </div>
-                  </div>
-                </footer>
+                  </footer>
+                </>
               )}
             </motion.section>
           </>

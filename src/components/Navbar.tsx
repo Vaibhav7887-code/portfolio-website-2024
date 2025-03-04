@@ -187,6 +187,46 @@ export default function Navbar({ isLandingPage = false }: NavbarProps) {
               )}
             </div>
           ))}
+          
+          {/* Design System Link */}
+          <div 
+            className="relative"
+            onMouseEnter={() => !isMobile && setHoveredItem('Design system')}
+            onMouseLeave={handleMouseLeave}
+          >
+            <a
+              href="https://design.system.vaibhav.design/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative flex items-center"
+            >
+              Design system
+              <AnimatePresence mode="wait">
+                {hoveredItem === 'Design system' && !isMobile && (
+                  <motion.div
+                    className="absolute bg-black h-[2px] left-1/2 bottom-0"
+                    initial={{ width: '4px', x: '-50%', opacity: 0 }}
+                    animate={{ 
+                      width: '100%',
+                      x: '-50%',
+                      opacity: 1,
+                      transition: {
+                        type: 'spring',
+                        stiffness: 350,
+                        damping: 15
+                      }
+                    }}
+                    exit={{ 
+                      width: '4px',
+                      x: '-50%',
+                      opacity: 0,
+                      transition: { duration: 0.1 }
+                    }}
+                  />
+                )}
+              </AnimatePresence>
+            </a>
+          </div>
         </div>
       </div>
     </nav>
