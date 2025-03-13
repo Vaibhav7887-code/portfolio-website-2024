@@ -11,9 +11,14 @@ import { track } from '@vercel/analytics'
 export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(true)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [isMobileLandscape, setIsMobileLandscape] = useState(false)
+
+  // Initialize loading state on client side only
+  useEffect(() => {
+    setIsLoading(true); // Set to true only on client side
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -211,6 +216,13 @@ export default function Home() {
 
     // Replace current loading effect useEffect
     useEffect(() => {
+      // Set a shorter fallback timeout
+      const fallbackTimeout = setTimeout(() => {
+        console.warn('Fallback timeout reached; dismissing loading screen.');
+        setIsLoading(false);
+      }, 3000); // Reduced from 5000ms to 3000ms
+
+      // Immediately start loading assets
       const imagesToLoad = ["/mobileRender.jpg", "/LaptopRender2.jpg"];
       const videosToLoad = ["/CrdxFinalAnimVideoH264.mp4", "/SlideAnimVideoH264.mp4"];
 
@@ -228,12 +240,7 @@ export default function Home() {
         video.onerror = () => resolve();
       });
 
-      // Asset loading effect with fallback timeout
-      const fallbackTimeout = setTimeout(() => {
-        console.warn('Fallback timeout reached; dismissing loading screen.');
-        setIsLoading(false);
-      }, 5000);
-
+      // Load assets in parallel
       Promise.all([
         ...imagesToLoad.map(loadImage),
         ...videosToLoad.map(loadVideo)
@@ -244,6 +251,9 @@ export default function Home() {
         clearTimeout(fallbackTimeout);
         setIsLoading(false);
       });
+
+      // Ensure loading screen is dismissed even if assets fail to load
+      return () => clearTimeout(fallbackTimeout);
     }, []);
 
     // Add this new effect near the top of the Home function
@@ -704,7 +714,7 @@ export default function Home() {
   return (
     <>
       <AnimatePresence mode="wait">
-        {isLoading && (
+        {isLoading && typeof window !== 'undefined' && (
           <motion.div 
             className="fixed inset-0 z-[100] bg-white flex items-center justify-center"
             exit={{ opacity: 0 }}
@@ -765,8 +775,8 @@ export default function Home() {
         ref={containerRef}
         className="relative h-[800vh]"
         initial={{ opacity: 0 }}
-        animate={{ opacity: isLoading ? 0 : 1 }}
-          transition={{ duration: 0.5 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
       >
         <Navbar isLandingPage={true} />
 

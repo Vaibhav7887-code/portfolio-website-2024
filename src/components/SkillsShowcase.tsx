@@ -104,7 +104,7 @@ function DesktopSkills() {
         {skills.map((skill, index) => (
           <motion.div
             key={skill.name}
-            className={`relative transition-colors py-2 px-3 sm:px-4 group ${!isMobile ? 'cursor-none' : ''}`}
+            className={`relative transition-colors py-2 px-3 sm:px-4 group`}
             onMouseEnter={() => handleSkillHover(skill.name)}
             style={{
               color: !isMobile && (hoveredSkill === skill.name || (!hoveredSkill && index === activeSkillIndex)) 

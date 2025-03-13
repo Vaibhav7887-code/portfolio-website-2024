@@ -2,7 +2,7 @@
 
 import { Alice, Sacramento } from 'next/font/google'
 import { Open_Sans } from 'next/font/google'
-import CustomCursor from '@/components/CustomCursor'
+// import CustomCursor from '@/components/CustomCursor'
 import './globals.css'
 import { Analytics } from '@vercel/analytics/react'
 import { track } from '@vercel/analytics'
@@ -38,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${alice.variable} ${sacramento.variable} ${openSans.variable}`}>
       <body>
-        <CustomCursor />
+        {/* <CustomCursor /> */}
         {children}
         <Analytics />
       </body>
