@@ -1,6 +1,9 @@
 'use client'
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
+import Link from 'next/link'
+import Navbar from '@/components/Navbar'
+import TableOfContents from '@/components/TableOfContents'
 import OrientationWarning from '@/components/OrientationWarning'
 import MobileControls from '@/components/MobileControls'
 import ProjectSwitcher from '@/components/ProjectSwitcher'
@@ -10,10 +13,7 @@ import CaseStudyControls from '@/components/CaseStudyControls'
 interface TOCSection {
   title: string
   slides: string
-  items?: Array<{
-    title: string
-    slides: string
-  }>
+  items?: { title: string; slides: string }[]
 }
 
 const scrollToSection = (section?: 'case-studies' | 'contact') => {
