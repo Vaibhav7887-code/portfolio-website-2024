@@ -46,7 +46,7 @@ export default function TableOfContents({ currentSlide, showUI, sections, scroll
     if (currentSectionIndex !== -1 && currentSectionIndex !== expandedSection) {
       setExpandedSection(currentSectionIndex)
     }
-  }, [currentSlide, sections, expandedSection])
+  }, [currentSlide, sections])
 
   // Helper function to check if item is current
   const isItemCurrent = (slideRange: string) => {
@@ -54,16 +54,39 @@ export default function TableOfContents({ currentSlide, showUI, sections, scroll
     return currentSlide >= start && currentSlide <= (end || start)
   }
 
+  // Handle section click
+  const handleSectionClick = (section: TOCItem, index: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (section.items) {
+      // For sections with subsections, toggle expansion
+      setExpandedSection(expandedSection === index ? null : index);
+    } else {
+      // For sections without subsections, navigate and close
+      const slideNumber = Number(section.slides.split('-')[0]);
+      scrollToSlide(slideNumber);
+      setShowUI(false);
+    }
+  };
+
+  // Handle subsection click
+  const handleSubsectionClick = (slideNumber: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    scrollToSlide(slideNumber);
+    setShowUI(false);
+  };
+
   if (isMobile) return null
 
   return (
     <motion.div
-      className="fixed left-8 bottom-8 z-[70] bg-white/80 backdrop-blur-xl shadow-lg w-[300px] rounded-lg p-4 table-of-contents"
+      className="fixed left-8 bottom-8 z-[90] bg-white/80 backdrop-blur-xl shadow-lg w-[300px] rounded-lg p-4 table-of-contents"
       initial={{ x: -350 }}
       animate={{ x: showUI ? 0 : -350 }}
+      exit={{ x: -350 }}
       transition={{ duration: 0.3 }}
-      onMouseEnter={() => setShowUI(true)}
-      onMouseLeave={() => setShowUI(false)}
     >
       <h3 className="font-alice text-lg mb-4 text-[#333333]">Table of Contents</h3>
       <div className="space-y-2 max-h-[60vh] overflow-y-auto">
@@ -73,11 +96,7 @@ export default function TableOfContents({ currentSlide, showUI, sections, scroll
               className={`w-full text-left font-opensans text-sm ${
                 isItemCurrent(section.slides) ? 'text-[#FF6B00]' : 'text-gray-700'
               } hover:text-[#FF6B00] transition-colors font-bold`}
-              onClick={() => {
-                const newSection = expandedSection === index ? null : index
-                setExpandedSection(newSection)
-                scrollToSlide(Number(section.slides.split('-')[0]))
-              }}
+              onClick={(e) => handleSectionClick(section, index, e)}
             >
               <span>{section.title}</span>
             </button>
@@ -98,7 +117,7 @@ export default function TableOfContents({ currentSlide, showUI, sections, scroll
                         className={`w-full text-left text-sm ${
                           isItemCurrent(item.slides) ? 'text-[#FF6B00]' : 'text-gray-600'
                         } hover:text-[#FF6B00] transition-colors`}
-                        onClick={() => scrollToSlide(Number(item.slides.split('-')[0]))}
+                        onClick={(e) => handleSubsectionClick(Number(item.slides.split('-')[0]), e)}
                       >
                         <span className="text-xs">{item.title}</span>
                       </button>

@@ -8,6 +8,7 @@ import OrientationWarning from '@/components/OrientationWarning'
 import MobileControls from '@/components/MobileControls'
 import ProjectSwitcher from '@/components/ProjectSwitcher'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
+import CaseStudyControls from '@/components/CaseStudyControls'
 
 const tocSections = [
   {
@@ -200,9 +201,7 @@ const scrollToSection = (section?: 'case-studies' | 'contact') => {
 export default function TataMotorsCase() {
   const isMobile = useMediaQuery('(max-width: 768px)')
   const [currentSlide, setCurrentSlide] = useState(1)
-  const [showUI, setShowUI] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [mouseTimeout, setMouseTimeout] = useState<NodeJS.Timeout>()
   const containerRef = useRef<HTMLDivElement>(null)
   const totalSlides = 62
 
@@ -220,39 +219,6 @@ export default function TataMotorsCase() {
     }, 2000)
   }, [])
 
-  // Handle mouse movement
-  useEffect(() => {
-    if (isMobile) {
-      setShowUI(false)
-      return
-    }
-
-    const handleMouseMove = () => {
-      const tocElement = document.querySelector('.table-of-contents')
-      const isOverToc = tocElement?.matches(':hover')
-
-      if (isOverToc) {
-        setShowUI(true)
-        if (mouseTimeout) {
-          clearTimeout(mouseTimeout)
-          setMouseTimeout(undefined)
-        }
-        return
-      }
-
-      setShowUI(true)
-      if (mouseTimeout) clearTimeout(mouseTimeout)
-      const timeout = setTimeout(() => setShowUI(false), 2000)
-      setMouseTimeout(timeout)
-    }
-
-    window.addEventListener('mousemove', handleMouseMove)
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove)
-      if (mouseTimeout) clearTimeout(mouseTimeout)
-    }
-  }, [mouseTimeout, isMobile])
-
   // Update current slide based on scroll
   useEffect(() => {
     const unsubscribe = scrollYProgress.on('change', value => {
@@ -262,29 +228,10 @@ export default function TataMotorsCase() {
     return () => unsubscribe()
   }, [scrollYProgress, totalSlides])
 
-  // Add this after the other useEffect hooks
-  useEffect(() => {
-    const previewContainer = document.querySelector('.preview-scroll')
-    if (previewContainer) {
-      const scrollToCurrentSlide = () => {
-        const slideElement = previewContainer.children[currentSlide - 1] as HTMLElement
-        if (slideElement) {
-          slideElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
-        }
-      }
-      scrollToCurrentSlide()
-    }
-  }, [currentSlide])
-
   const scrollToSlide = (slideNumber: number) => {
     const scrollHeight = document.documentElement.scrollHeight - window.innerHeight
-    const scrollPerSlide = scrollHeight / totalSlides
-    const targetScroll = (slideNumber - 1) * scrollPerSlide
-    
-    window.scrollTo({
-      top: targetScroll,
-      behavior: 'smooth'
-    })
+    const targetScroll = (scrollHeight * (slideNumber - 1)) / (totalSlides - 1)
+    window.scrollTo({ top: targetScroll, behavior: 'smooth' })
   }
 
   return (
@@ -292,39 +239,21 @@ export default function TataMotorsCase() {
       <OrientationWarning />
       <ProjectSwitcher currentProject="Tata Motors" />
       
-      {/* Loading Screen */}
       <AnimatePresence>
         {isLoading && (
           <motion.div 
             className="fixed inset-0 z-[100] bg-white flex items-center justify-center"
-            exit={{ 
-              opacity: 0,
-              transition: { duration: 0.5, ease: "easeOut" }
-            }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ 
-                opacity: 1, 
-                scale: 1,
-                transition: {
-                  duration: 0.5,
-                  ease: "easeOut"
-                }
-              }}
-              exit={{ 
-                opacity: 0,
-                scale: 1.1,
-                transition: {
-                  duration: 0.5,
-                  ease: "easeIn"
-                }
-              }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.1 }}
+              transition={{ duration: 0.5 }}
               className="text-center"
             >
-              <h1 className="font-alice text-3xl text-[#333333] mb-4">
-                Tata Motors - FleetEdge
-              </h1>
+              <h1 className="font-alice text-3xl text-[#333333] mb-4">Tata Motors - FleetEdge</h1>
               <div className="flex items-center justify-center gap-2">
                 <motion.div
                   className="w-3 h-3 rounded-full bg-[#FF6B00]"
@@ -388,109 +317,16 @@ export default function TataMotorsCase() {
 
         {/* Desktop UI */}
         {!isMobile && (
-          <>
-            <motion.div 
-              className="fixed top-0 left-0 w-full z-[80] bg-white/80 backdrop-blur-xl shadow-lg"
-              initial={{ y: -200 }}
-              animate={{ y: showUI ? 0 : -200 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="w-full px-12 py-8">
-                <Navbar />
-              </div>
-              <div className="w-full px-8 pb-6 border-t border-gray-100">
-                <div className="flex justify-between items-center mb-4">
-                  <h1 className="font-alice text-2xl text-[#333333]">
-                    Tata Motors - FleetEdge
-                  </h1>
-                  <span className="font-alice text-lg text-gray-500">2022</span>
-                </div>
-
-                <div className="flex justify-between items-center mt-4">
-                  <Link 
-                    href="/"
-                    className="font-alice text-lg hover:text-[#FF6B00] transition-colors"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      scrollToSection('case-studies')
-                    }}
-                  >
-                    ← Back to Home
-                  </Link>
-                  <div className="font-alice text-lg">
-                    {currentSlide}/{totalSlides}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            <TableOfContents 
+          <CaseStudyControls
               currentSlide={currentSlide}
-              showUI={showUI}
-              sections={tocSections}
+            totalSlides={totalSlides}
+            tocSections={tocSections}
               scrollToSlide={scrollToSlide}
-              setShowUI={setShowUI}
-            />
-
-            {/* Desktop Preview Panel */}
-            <div className="fixed right-8 top-1/2 -translate-y-1/2 z-[80]">
-              <motion.div
-                className="bg-white/80 backdrop-blur-xl rounded-lg shadow-lg p-4 w-48"
-                initial={{ x: 300 }}
-                animate={{ x: showUI ? 0 : 300 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="flex flex-col gap-4">
-                  <div className="flex justify-between items-center">
-                    <span className="font-alice text-lg text-[#333333]">
-                      Slide Preview
-                    </span>
-                    <span className="font-alice text-sm text-gray-500">
-                      {currentSlide}/{totalSlides}
-                    </span>
-                  </div>
-                  <div className="relative h-1 bg-gray-200 rounded-full overflow-hidden">
-                    <motion.div
-                      className="absolute top-0 left-0 h-full bg-[#FF6B00]"
-                      style={{ width: `${(currentSlide / totalSlides) * 100}%` }}
-                    />
-                  </div>
-                  <div 
-                    className="flex gap-2 mt-2 overflow-x-auto pb-2 snap-x snap-mandatory preview-scroll"
-                  >
-                    {[...Array(4)].map((_, i) => {
-                      const slideNum = currentSlide + i - 1
-                      if (slideNum < 1 || slideNum > totalSlides) {
-                        return (
-                          <div
-                            key={i}
-                            className="relative aspect-[4/3] rounded-lg overflow-hidden bg-gray-100"
-                          />
-                        )
-                      }
-                      return (
-                        <button
-                          key={i}
-                          className={`relative aspect-[4/3] rounded-lg overflow-hidden ${
-                            slideNum === currentSlide ? 'ring-2 ring-[#FF6B00]' : ''
-                          }`}
-                          onClick={() => scrollToSlide(slideNum)}
-                        >
-                          <img
-                            src={`/Tata Motors - Fleetedge/Portfolio presentation_Vaibhav (2)-${String(
-                              slideNum + 5
-                            ).padStart(2, '0')}.png`}
-                            alt={`Slide ${slideNum}`}
-                            className="w-full h-full object-cover"
-                          />
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </>
+            onBack={() => scrollToSection('case-studies')}
+            projectTitle="Tata Motors - FleetEdge"
+            projectYear="2022"
+            imagePath="/Tata Motors - Fleetedge"
+          />
         )}
 
         {/* Mobile Controls */}
