@@ -10,7 +10,16 @@ import ProjectSwitcher from '@/components/ProjectSwitcher'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import CaseStudyControls from '@/components/CaseStudyControls'
 
-const tocSections = [
+interface TOCSection {
+  title: string
+  slides: string
+  items?: Array<{
+    title: string
+    slides: string
+  }>
+}
+
+const tocSections: TOCSection[] = [
   {
     title: 'Introduction',
     slides: '1-11',

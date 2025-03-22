@@ -10,6 +10,15 @@ import ProjectSwitcher from '@/components/ProjectSwitcher'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import CaseStudyControls from '@/components/CaseStudyControls'
 
+interface TOCSection {
+  title: string
+  slides: string
+  items?: Array<{
+    title: string
+    slides: string
+  }>
+}
+
 const scrollToSection = (section?: 'case-studies' | 'contact') => {
   sessionStorage.setItem('scrollTarget', section || 'case-studies')
   sessionStorage.setItem('shouldScroll', 'true')
@@ -17,7 +26,7 @@ const scrollToSection = (section?: 'case-studies' | 'contact') => {
 }
 
 // Add the TOC sections data
-const tocSections = [
+const tocSections: TOCSection[] = [
   {
     title: 'Introduction',
     slides: '3-4',
