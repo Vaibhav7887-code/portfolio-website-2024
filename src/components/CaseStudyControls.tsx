@@ -1,14 +1,19 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import Link from 'next/link'
 import Navbar from './Navbar'
 import TableOfContents from './TableOfContents'
+
+interface TOCSection {
+  title: string
+  slides: string
+  items?: { title: string; slides: string }[]
+}
 
 interface CaseStudyControlsProps {
   currentSlide: number
   totalSlides: number
-  tocSections: any[]
+  tocSections: TOCSection[]
   scrollToSlide: (slideNumber: number) => void
   onBack: () => void
   projectTitle: string
